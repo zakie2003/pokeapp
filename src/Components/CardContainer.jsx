@@ -7,38 +7,45 @@ function CardContainer() {
     const [searchval, setval] = useState("");
     const [error, setError] = useState(null);
     const [filteredData, setFilteredData] = useState([]);
+    const [nextUrl, setNextUrl] = useState('https://pokeapi.co/api/v2/pokemon');
+    const [hasMore, setHasMore] = useState(true);
+
+    const fetchBatchData = async (url, batchSize = 20, delay = 500) => {
+        try {
+            const allData = [];
+            let nextBatchUrl = url;
+
+            while (nextBatchUrl && allData.length < batchSize) {
+                const response = await fetch(nextBatchUrl);
+                const result = await response.json();
+                nextBatchUrl = result.next;
+                allData.push(...result.results);
+
+
+                await new Promise((resolve) => setTimeout(resolve, delay));
+            }
+
+            const detailedData = await Promise.all(
+                allData.map(async (pokemon) => {
+                    const res = await fetch(pokemon.url);
+                    return res.json();
+                })
+            );
+
+            setData((prevData) => [...prevData, ...detailedData]);
+            setFilteredData((prevData) => [...prevData, ...detailedData]);
+            setNextUrl(nextBatchUrl);
+            setHasMore(!!nextBatchUrl);
+        } catch (error) {
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchAllData = async () => {
-            try {
-                setLoading(true);
-                let nextUrl = 'https://pokeapi.co/api/v2/pokemon';
-                let allData = [];
-
-                while (nextUrl) {
-                    const response = await fetch(nextUrl);
-                    const result = await response.json();
-                    allData = allData.concat(result.results);
-                    nextUrl = result.next;
-                }
-
-                const detailedData = await Promise.all(
-                    allData.map(async (pokemon) => {
-                        const res = await fetch(pokemon.url);
-                        return res.json();
-                    })
-                );
-
-                setData(detailedData);
-                setFilteredData(detailedData);
-                setLoading(false);
-            } catch (error) {
-                setError(error);
-                setLoading(false);
-            }
-        };
-
-        fetchAllData();
+        setLoading(true);
+        fetchBatchData(nextUrl);
     }, []);
 
     useEffect(() => {
@@ -51,6 +58,17 @@ function CardContainer() {
             setFilteredData(searchResults);
         }
     }, [searchval, data]);
+
+    const handleScroll = () => {
+        if (window.innerHeight + document.documentElement.scrollTop + 1 >= document.documentElement.scrollHeight && hasMore && !loading) {
+            fetchBatchData(nextUrl);
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [handleScroll, hasMore, loading]);
 
     return (
         <div className="bg-slate-900 min-h-screen">
@@ -73,13 +91,29 @@ function CardContainer() {
                 </div>
             </center>
             <div className="grid-cols-4">
-                {
-                filteredData.length === 0 ? (
+                {error && <div className="text-center text-yellow-50">Error: {error.message}</div>}
+                {filteredData.length === 0 && !loading && (
                     <div className="text-center text-yellow-50">
                         No Pokémon found with the name "{searchval}"
                     </div>
-                ):
-                loading ? (
+                )}
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {filteredData.map((val, key) => (
+                            <Card
+                                key={key}
+                                name={val.name}
+                                image={val.sprites.other["official-artwork"].front_default}
+                                hp={val.stats[0].base_stat}
+                                atk={val.stats[1].base_stat}
+                                def={val.stats[2].base_stat}
+                                speed={val.stats[5].base_stat}
+                                types={val.types}
+                            />
+                        ))}
+                    </div>
+                </div>
+                {loading && (
                     <div className="bg-slate-800">
                         <div className="absolute -translate-x-1/2 -translate-y-1/2 top-2/4 left-1/2 text-center bg-slate-900 w-max">
                             <div role="status">
@@ -103,22 +137,10 @@ function CardContainer() {
                             </div>
                         </div>
                     </div>
-                ) :  (
-                    <div className="container mx-auto px-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {filteredData.map((val, key) => (
-                                <Card
-                                    key={key}
-                                    name={val.name}
-                                    image={val.sprites.other["official-artwork"].front_default}
-                                    hp={val.stats[0].base_stat}
-                                    atk={val.stats[1].base_stat}
-                                    def={val.stats[2].base_stat }
-                                    speed={val.stats[5].base_stat}
-                                    types={val.types}
-                                />
-                            ))}
-                        </div>
+                )}
+                {!hasMore && (
+                    <div className="text-center text-yellow-50">
+                        No more Pokémon to load.
                     </div>
                 )}
             </div>
