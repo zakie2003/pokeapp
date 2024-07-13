@@ -1,0 +1,21 @@
+const typeColors = {
+    grass: '#35f635',
+    fire: 'red',
+    water: 'blue',
+    bug: 'green',
+    normal: 'grey',
+    poison: 'purple',
+    electric: 'yellow',
+    ground: '#7c7c01',
+    fairy: 'pink',
+    fighting: 'red',
+    psychic: 'black',
+    rock: '#943600',
+    ghost: 'purple',
+    ice: 'blue',
+    dragon: 'purple',
+    dark: 'gray',
+    steel: 'gray',
+    flying: '#00a4ff',
+};
+export default typeColors;
