@@ -1,11 +1,13 @@
 import React from "react";
 import typeColors from "../Assests/Poketypes";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 export function Card(props) {
     return (
         <div className="max-w-sm bg-yellow-50 border border-yellow-300 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700">
             <center>
                 <p className="align-middle">
-                    <img className="p-3 rounded-t-lg object-cover w-32" src={props.image} alt={props.name} loading="lazy"/>
+
+                    <LazyLoadImage className="p-3 rounded-t-lg object-cover w-32" src={props.image} alt={props.name}  />
                 </p>
             </center>
             <div className="p-5">
