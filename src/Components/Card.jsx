@@ -11,9 +11,9 @@ export function Card(props) {
                 </p>
             </center>
             <div className="p-5">
-                <p>
-                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-yellow-900 dark:text-white">{props.name.charAt(0).toUpperCase() + props.name.slice(1)}</h5>
-                </p>
+
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-yellow-900 dark:text-white">{props.name.charAt(0).toUpperCase() + props.name.slice(1)}</h5>
+
                 <div className="grid grid-cols-2 gap-4">
                     <p className="font-normal text-yellow-700 dark:text-gray-100">Health : {props.hp}</p>
                     <p className="font-normal text-yellow-700 dark:text-gray-100">Attack : {props.atk}</p>
