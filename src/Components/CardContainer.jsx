@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card } from "./Card";
 
 function CardContainer() {
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line
   const [allData, setAllData] = useState([]);
+  // eslint-disable-next-line
   const [searchval, setval] = useState("");
   const [url, setNextUrl] = useState("https://pokeapi.co/api/v2/pokemon");
   const [detailedData, setDetailedData] = useState([]);
@@ -72,7 +74,7 @@ function CardContainer() {
       sethasmore(false);
       // console.log(moreDetailedData);
     }
-    
+
     addMoreData();
 
   }, [url]);
@@ -95,18 +97,17 @@ function CardContainer() {
         <h1 className="text-yellow-50 p-5 text-center text-5xl">
           Pokedex App
         </h1>
+        
+          <h1 className="text-yellow-50 p-5 text-center text-5xl">
+            All Pokemon
+          </h1>
+        
       </div>
       <center>
         <div className="container">
-          <input
-            value={searchval}
-            onChange={(e) => setval(e.target.value)}
-            style={{ width: "50%" }}
-            type="text"
-            id="first_name"
-            className="my-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Search Pokemon (Scroll Down More to Increase Search Range)"
-          />
+          <Link to="/search">
+            <button className="my-2 text-white bg-slate-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-slate-700 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Search Pokemon</button>
+          </Link>
         </div>
       </center>
       <div className="grid-cols-4">

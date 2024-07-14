@@ -8,7 +8,7 @@ const typeColors = {
     electric: 'yellow',
     ground: '#7c7c01',
     fairy: 'pink',
-    fighting: 'red',
+    fighting: '#a2204c',
     psychic: 'black',
     rock: '#943600',
     ghost: 'purple',
