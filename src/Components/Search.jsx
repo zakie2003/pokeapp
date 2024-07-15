@@ -1,56 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import typeColors from "../Assests/Poketypes";
 import { Link } from "react-router-dom";
+
 export const Search = () => {
   const [query, setQuery] = useState('');
   const [pokemon, setPokemon] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const abortControllerRef = useRef(null);
 
-  async function fetchDetails(url) {
+  const fetchDetails = async (url) => {
     let final_result = await fetch(url);
     final_result = await final_result.json();
     setPokemon(final_result);
-
-  }
+  };
 
   const fetchPokemon = async () => {
     if (!query) return;
     setPokemon(null);
     setLoading(true);
     setError(null);
+
+
+    if (abortControllerRef.current) 
+    {
+      abortControllerRef.current.abort();
+    }
+
+
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     try {
-      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/`);
+      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/`, { signal });
       const data = await response.json();
       let url = data.next;
-      let searched_arr = data.results.filter((element) => (element.name === query));
+      let searched_arr = data.results.filter((element) => element.name === query);
       if (searched_arr.length === 0) {
         while (url) {
-          let result = await fetch(url);
+          let result = await fetch(url, { signal });
           result = await result.json();
-          // console.log(result);
-          searched_arr = result.results.filter((element) => (element.name === query));
-          console.log(searched_arr.length);
+          searched_arr = result.results.filter((element) => element.name === query);
           if (searched_arr.length !== 0) {
-            console.log(searched_arr);
             let final_result_url = searched_arr[0].url;
             fetchDetails(final_result_url);
             setLoading(false);
             return;
           }
-
           url = result.next;
-          console.log(url);
         }
         throw new Error('Pokémon not found');
-      }
-      else {
-
+      } else {
         fetchDetails(searched_arr[0].url);
       }
     } catch (err) {
-      setError(err.message);
-      setPokemon(null);
+      if (err.name === 'AbortError') {
+        console.log('Request was aborted');
+      } else {
+        setError(err.message);
+        setPokemon(null);
+      }
     }
     setLoading(false);
   };
@@ -58,7 +67,6 @@ export const Search = () => {
   const handleInputChange = (e) => {
     let val = e.target.value;
     setQuery(val.toLowerCase());
-
   };
 
   const handleSearchClick = () => {
@@ -94,12 +102,12 @@ export const Search = () => {
               </button>
             </div>
             <div className="w-full md:w-1/2">
-              {loading && <p className="text-white">Loading...</p>}
+              {loading && <p className="text-white">Searching Please Wait A Minute...</p>}
               {error && <p className="text-red-500">{error}</p>}
               {pokemon && (
                 <div className="bg-gray-700 p-4 rounded-lg text-white">
                   <h2 className="text-2xl font-bold mb-2 capitalize">{pokemon.name}</h2>
-                  <img src={pokemon.sprites.other.showdown.front_default} alt={pokemon.name} className="w-32 h-32 mx-auto" />
+                  <img src={pokemon.sprites.other['official-artwork'].front_default} alt={pokemon.name} className="w-32 h-32 mx-auto" />
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div>
                       <p className="font-bold">Height:</p>
@@ -146,4 +154,3 @@ export const Search = () => {
     </div>
   );
 };
-
