@@ -126,7 +126,7 @@ function CardContainer() {
               <Card
                 key={key}
                 name={val.name}
-                image={val.sprites.other.showdown.front_default}
+                image={val.sprites.other['official-artwork'].front_default}
                 hp={val.stats[0].base_stat}
                 atk={val.stats[1].base_stat}
                 def={val.stats[2].base_stat}
